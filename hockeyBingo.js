@@ -17,6 +17,7 @@ var sizeBoard = function(){
     "height" : (width / 5.0) - 18,
     "padding" : "5px"
   });
+
 }
 
 var syncSquares = function(squares){
@@ -61,7 +62,11 @@ var checkBingo = function(squares){
 }
 
 var endGame = function(){
-  alert("BINGO");
+  $(".win-modal").css("visibility", "visible");
+}
+
+var closeModal = function(){
+  $(".win-modal").css("visibility", "hidden");
 }
 
 var hockeyBingo = function(){
@@ -92,6 +97,8 @@ var hockeyBingo = function(){
       }
     }
   );
+
+  $(".win-x").click(closeModal);
 }
 
 var randInt = function(min, max){
