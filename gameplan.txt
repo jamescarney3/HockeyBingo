@@ -1,0 +1,24 @@
+on load
+  if localStorage.gameState === "undefined" or isExpired(localStorage)
+    contents = (read json, shuffle array, take 0-23)
+    localStorage.gameState = {contents: contents, marked: [], timestamp: Date.now()}
+  else
+    for each el in localStorage.marked squares[el].addClass("marked")
+  end
+
+  fill squares with localStorage.contents (squares can be $(".cell").not(".free"))
+
+
+on click of square
+  if not marked
+    square.addClass("marked")
+    localStorage.marked.push(squares.index(square))
+  else
+    square.removeClass("marked")
+    localStorage.splice(localStorage.marked.index(squares.index(square)), 1)
+  end
+
+
+isExpired = function(l){
+  return Date.now() - l.timestamp > 43200000
+}
