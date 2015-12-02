@@ -25,6 +25,9 @@ var sizeBoard = HockeyBingo.sizeBoard = function(){
 var syncSquares = HockeyBingo.syncSquares = function(gameState){
   var squares = $(".cell").not(".free");
 
+  $(squares).removeClass("marked");
+  squares.off();
+
   gameState.contents.forEach(function(el, idx){
     $(squares[idx]).html(el);
   });
@@ -81,6 +84,12 @@ var play = HockeyBingo.play = function(){
   sizeBoard();
   $(window).resize(sizeBoard);
   $(".win-x").click(closeModal);
+  $(".new-card").click(function(){
+    resetGameState(function(gameState){
+      syncSquares(gameState);
+      setGameState(gameState);
+    })
+  });
 
   syncGameState(function(gameState){
     syncSquares(gameState);
@@ -89,6 +98,7 @@ var play = HockeyBingo.play = function(){
 };
 
 var toggleMark = HockeyBingo.toggleMark = function(square, squares, gameState){
+  debugger
   if(!$(square).hasClass("marked")){
     $(square).addClass("marked");
     gameState.marked.push(squares.index(square))
@@ -138,7 +148,6 @@ var syncGameState = HockeyBingo.syncGameState = function(callback){
 
 var resetGameState = HockeyBingo.resetGameState = function(callback){
   $.getJSON("squares2015-16.json").done(function(json){
-    debugger
     gameState = {contents: richDShuffle(json).slice(0, 24),
                         marked: [],
                         timestamp: Date.now()};
