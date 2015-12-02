@@ -107,6 +107,8 @@ var randInt = HockeyBingo.randInt = function(min, max){
 
 var isExpired = HockeyBingo.isExpired = function(gameState){
   return Date.now() - gameState.timestamp > 43200000
+  // Keep this line in for testing:
+  // return Date.now() - gameState.timestamp > 432
 };
 
 var richDShuffle = HockeyBingo.richDShuffle = function(arr){

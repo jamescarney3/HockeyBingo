@@ -31,6 +31,32 @@ ul, li {
   margin: 0;
 }
 
+.new-card {
+  cursor: pointer;
+  margin: auto;
+  margin-top: 20px;
+  width: 50%;
+  text-align: center;
+  font-size: 36px;
+  text-shadow:
+    -1px -1px 0 @gold,
+    1px -1px 0 @gold,
+    -1px 1px 0 @gold,
+    1px 1px 0 @gold;
+  border: 5px solid @black;
+  padding-top: 5px;
+  
+  &:hover {
+    cursor: pointer;
+    text-shadow:
+      -1px -1px 0 @white,
+      1px -1px 0 @white,
+      -1px 1px 0 @white,
+      1px 1px 0 @white;
+    background: @gold;
+  }
+}
+
 .win-modal {
   visibility: hidden;
   position: fixed;
