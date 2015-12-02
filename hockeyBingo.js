@@ -1,4 +1,7 @@
-var sizeBoard = function(){
+window.HockeyBingo = window.HockeyBingo || {}
+
+
+var sizeBoard = HockeyBingo.sizeBoard = function(){
   var w = $(window).width();
   var width = (w <= 700 ? w : 700);
 
@@ -17,23 +20,29 @@ var sizeBoard = function(){
     "height" : (width / 5.0) - 18,
     "padding" : "5px"
   });
+};
 
-}
+var syncSquares = HockeyBingo.syncSquares = function(gameState){
+  var squares = $(".cell").not(".free");
 
-var syncSquares = function(squares){
-
-  $.getJSON("squares2015-16.json").done(function(json){
-    var contents = richDShuffle(json)
-
-    squares.each(function(idx){
-      if(idx != 12){
-        $(squares[idx]).html(contents.pop());
-      };
-    });
+  gameState.contents.forEach(function(el, idx){
+    $(squares[idx]).html(el);
   });
-}
+  gameState.marked.forEach(function(el){
+    $(squares[el]).addClass("marked");
+  });
 
-var checkBingo = function(squares){
+  squares.hover(
+    function(){$(this).addClass("hovered");},
+    function(){$(this).removeClass("hovered");}
+  );
+
+  squares.click(
+    function(){toggleMark(this, squares, gameState);}
+  );
+};
+
+var checkBingo = HockeyBingo.checkBingo = function(squares){
   var bSets = bingoSets();
   var bingo = false;
 
@@ -58,54 +67,49 @@ var checkBingo = function(squares){
   if(bingo){
     endGame();
   };
+};
 
-}
-
-var endGame = function(){
+var endGame = HockeyBingo.endGame = function(){
   $(".win-modal").css("visibility", "visible");
-}
+};
 
-var closeModal = function(){
+var closeModal = HockeyBingo.closeModal = function(){
   $(".win-modal").css("visibility", "hidden");
-}
+};
 
-var hockeyBingo = function(){
-  var squares = $(".cell");
-
+var play = HockeyBingo.play = function(){
   sizeBoard();
-  syncSquares(squares);
-
   $(window).resize(sizeBoard);
-
-  squares.not(".free").hover(
-    function(){
-      $(this).addClass("hovered");
-    },
-    function(){
-      $(this).removeClass("hovered");
-    }
-  )
-
-  squares.not(".free").click(
-    function(){
-      if($(this).hasClass("marked")){
-        $(this).removeClass("marked");
-        $(this).removeClass("hovered");
-      }else{
-        $(this).addClass("marked");
-        checkBingo(squares);
-      }
-    }
-  );
-
   $(".win-x").click(closeModal);
-}
 
-var randInt = function(min, max){
+  syncGameState(function(gameState){
+    syncSquares(gameState);
+    setGameState(gameState);
+  });
+};
+
+var toggleMark = HockeyBingo.toggleMark = function(square, squares, gameState){
+  if(!$(square).hasClass("marked")){
+    $(square).addClass("marked");
+    gameState.marked.push(squares.index(square))
+    checkBingo(squares);
+  }else{
+    $(square).removeClass("marked");
+    $(square).removeClass("hovered");
+    gameState.marked.splice(gameState.marked.indexOf(squares.index(square)), 1);
+  }
+  setGameState(gameState);
+};
+
+var randInt = HockeyBingo.randInt = function(min, max){
   return Math.floor(Math.random() * (max - min)) + min
-}
+};
 
-var richDShuffle = function(arr){
+var isExpired = HockeyBingo.isExpired = function(gameState){
+  return Date.now() - gameState.timestamp > 43200000
+};
+
+var richDShuffle = HockeyBingo.richDShuffle = function(arr){
   for(i = 0; i <= arr.length - 2; i++){
     var j = randInt(i, arr.length)
 
@@ -115,13 +119,41 @@ var richDShuffle = function(arr){
   }
 
   return arr
-}
+};
 
-var setGameState = function(){
+var syncGameState = HockeyBingo.syncGameState = function(callback){
+  try{
+    gameState = getGameState();
+    if(!isExpired(gameState)){
+      callback(gameState);
+    }else{
+      resetGameState(callback);
+    }
+  }catch(e){
+    resetGameState(callback);
+  }
+};
 
-}
+var resetGameState = HockeyBingo.resetGameState = function(callback){
+  $.getJSON("squares2015-16.json").done(function(json){
+    debugger
+    gameState = {contents: richDShuffle(json).slice(0, 24),
+                        marked: [],
+                        timestamp: Date.now()};
+    callback(gameState);
+  });
+};
 
-var bingoSets = function(){
+var getGameState = HockeyBingo.getGameState = function(){
+  return JSON.parse(localStorage.gameState);
+};
+
+var setGameState = HockeyBingo.setGameState = function(gameState){
+  gameState.timestamp = Date.now();
+  localStorage.gameState = JSON.stringify(gameState);
+};
+
+var bingoSets = HockeyBingo.bingoSets = function(){
   return [
     [0, 1, 2, 3, 4],
     [5, 6, 7, 8, 9],
@@ -136,4 +168,4 @@ var bingoSets = function(){
     [0, 6, 17, 23],
     [4, 8, 15, 19]
   ]
-}
+};
